@@ -1,0 +1,133 @@
+
+import java_cup.runtime.*;
+   
+action code {:
+
+ public String x = "" ; 
+ 
+:}
+parser code {:
+
+   
+    
+    
+    public void report_error(String message, Object info) {
+   
+        StringBuilder m = new StringBuilder("Error");
+   
+         if (info instanceof java_cup.runtime.Symbol) {
+            
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+             if (s.left >= 0) {                
+                  m.append(" in line "+(s.left+1));   
+               	 
+               	  if (s.right >= 0)                    
+                 	 m.append(", column "+(s.right+1));
+            }
+        }
+   
+        m.append(" : "+message);
+   
+        System.err.println(m);
+    }
+   
+    
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+:};
+   
+
+   
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+   
+
+terminal           		SEMI, UNION, KLEENE, LPAREN, RPAREN, POS, EPSILON, SYMB, DIGIT;
+   
+non terminal Object     expr_list, expr_part, S, E, G, F, H;
+  
+
+/* -------------Precedence and Associatively of Terminals Section----------- */
+      
+  precedence left KLEENE;
+  precedence left UNION;
+
+/* ----------------------------Grammar Section-------------------- */
+   
+/*----------------------------------------------   
+   expr_list ::=   expr_list expr_part
+                 | expr_part 
+              
+   expr_part ::=   S SEMI
+   
+   S		 ::=   S UNION E
+   				 | E
+   
+   E		 ::=   E G
+   				 | G
+   				 
+   G		 ::=   G POS
+   				 | F
+   				 
+   F		 ::=   F KLEENE
+   				 | H
+   				 
+   H		 ::=   LPAREN S RPAREN
+   				 | DIGIT
+   				 | SYMB
+   				 | EPSILON           
+                 
+----------------------------------------------------*/
+   
+   expr_list ::= expr_list expr_part
+                 |
+                 expr_part
+                 ;
+               
+   expr_part ::= S:s
+                 {:   System.out.println(x); x = ""; :}
+                 SEMI
+                 ;
+
+   S		 ::= S:s UNION E:e
+   				 {: x += ", "; :}
+   				 |
+   				 E:e
+   				 {: RESULT = e; :}
+   				 ;
+   				 
+   E		 ::= E:e G:g
+   				 {: x += ". "; :}
+   				 |
+   				 G:g
+   				 {: RESULT = g; :}
+   				 ;
+   				 
+   G		 ::= G:g POS
+   				 {: x += "+ "; :}
+   				 |
+   				 F:f
+   				 {: RESULT = f; :}
+   				 ;
+   				 
+   F		 ::= F:f KLEENE
+   				 {: x += "* "; :}
+   				 |
+   				 H:h
+   				 {: RESULT = h; :}
+   				 ;
+   				 
+   H		 ::= LPAREN S:s RPAREN
+   				 {: RESULT = s; :}
+   				 |
+   				 DIGIT:d
+   				 {: x += d + " "; RESULT = d; :}
+   				 |
+   				 SYMB:s
+   				 {: x += s + " "; RESULT = s; :}
+   				 |
+   				 EPSILON:e
+   				 {: x += "$ "; RESULT = e; :}
+   				 ; 				 			 

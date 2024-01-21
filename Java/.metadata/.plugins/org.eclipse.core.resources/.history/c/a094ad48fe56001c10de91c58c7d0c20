@@ -1,0 +1,117 @@
+
+import java_cup.runtime.*;
+   
+action code {:
+
+ public String x = "" ; 
+ 
+:}
+parser code {:
+
+   
+    
+    
+    public void report_error(String message, Object info) {
+   
+        StringBuilder m = new StringBuilder("Error");
+   
+         if (info instanceof java_cup.runtime.Symbol) {
+            
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+   
+             if (s.left >= 0) {                
+                  m.append(" in line "+(s.left+1));   
+               	 
+               	  if (s.right >= 0)                    
+                 	 m.append(", column "+(s.right+1));
+            }
+        }
+   
+        m.append(" : "+message);
+   
+        System.err.println(m);
+    }
+   
+    
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+:};
+   
+
+   
+/* ------------Declaration of Terminals and Non Terminals Section----------- */
+   
+
+terminal           		SEMI, UNION, KLEENE, LPAREN, RPAREN, EPSILON, SYMBOL, DIGIT;
+   
+non terminal Object     expr_list, expr_part;
+  
+
+/* -------------Precedence and Associatively of Terminals Section----------- */
+      
+  precedence left KLEENE; 
+  precedence left UNION;
+
+/* ----------------------------Grammar Section-------------------- */
+   
+/*----------------------------------------------   
+   expr_list ::=   expr_list expr_part
+                 | expr_part 
+              
+   expr_part ::=   expr SEMI
+   expr      ::=   expr KLEENE factor
+   				 | expr expr
+                 | factor
+   factor    ::=   factor UNION term
+                 | term
+   term      ::=   LPAREN expr RPAREN
+                 | SYMBOL
+                 | DIGIT
+                 | EPSILON             
+                 
+----------------------------------------------------*/
+   
+   expr_list ::= expr_list expr_part
+                 |
+                 expr_part
+                 ;
+               
+   expr_part ::= expr:e
+                 {:   System.out.println(x + " = " + e); x = ""; :}
+                 SEMI
+                 ;
+
+   
+   expr      ::= expr:e KLEENE factor:f
+                 {: x += "* "; :}
+                 |
+                 expr:e expr:E
+                 {: x += ". "; :}
+                 |
+                 factor:f
+                 {: RESULT = new Integer(f.intValue()); :}
+                 ;
+   
+  factor    ::= factor:f TIMES term:t
+                 {: x += "* "; RESULT = new Integer(f.intValue() * t.intValue()); :}
+                 |
+                 factor:f DIVIDE term:t
+                 {: x += "/ "; RESULT = new Integer(f.intValue() / t.intValue()); :}
+                 |
+                 term:t
+                 {: RESULT = new Integer(t.intValue()); :}
+                 ;
+   
+  term      ::= LPAREN expr:e RPAREN
+                 {: RESULT = e;  :}
+                 |
+                 DIGIT:d
+                 {: x+= d+" "; RESULT = d; :}
+                 |
+                 SYMBOL:s
+                 {: x+= s+" "; RESULT = s; :}
+                 ;
+                 
+  

@@ -1,0 +1,6 @@
+INDEX VERSION 1.131+C:\Users\marck\OneDrive\Escritorio\Lenguajes Formales\Java\.metadata\.plugins\org.eclipse.jdt.core
+4014084351.index
+1071982097.index
+4161504764.index
+115950489.index
+959224947.index

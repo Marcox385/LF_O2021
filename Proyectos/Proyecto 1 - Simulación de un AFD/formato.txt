@@ -1,0 +1,11 @@
+/*
+
+	Sintaxis de archivo:
+	1 - Cadena de entrada
+	2 - Alfabeto: símbolos separados por punto y coma
+	3 - Estado inicial
+	4 - Estados finales
+	5 + N - Matriz con la función de transiciones (orden lineal
+				basado en estado inicial y final[es])
+
+*/
